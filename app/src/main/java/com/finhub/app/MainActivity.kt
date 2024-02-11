@@ -1,5 +1,6 @@
 package com.finhub.app
 
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.webkit.WebChromeClient
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity() {
             webSettings.javaScriptEnabled = true
             webSettings.loadWithOverviewMode = true
             webSettings.useWideViewPort = true
+            webSettings.textZoom = 100;
 
             webView.webViewClient = WebViewClient()
             webView.webChromeClient = WebChromeClient()
