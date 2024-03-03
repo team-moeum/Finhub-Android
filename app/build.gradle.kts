@@ -5,15 +5,15 @@ plugins {
 }
 
 android {
-    namespace = "com.finhub.app"
+    namespace = "com.fotcamp.finhub"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.finhub.app"
+        applicationId = "com.fotcamp.finhub"
         minSdk = 30
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,6 +43,7 @@ dependencies {
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("junit:junit:4.12")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))

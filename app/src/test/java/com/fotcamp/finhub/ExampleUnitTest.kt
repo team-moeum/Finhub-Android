@@ -1,4 +1,4 @@
-package com.finhub.app
+package com.fotcamp.finhub
 
 import org.junit.Test
 

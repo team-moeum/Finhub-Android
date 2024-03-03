@@ -1,4 +1,4 @@
-package com.finhub.app
+package com.fotcamp.finhub
 
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
