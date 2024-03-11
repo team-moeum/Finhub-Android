@@ -3,6 +3,7 @@ package com.fotcamp.finhub
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
 
             webView.webViewClient = WebViewClient()
             webView.webChromeClient = WebChromeClient()
+            webView.overScrollMode = View.OVER_SCROLL_NEVER
 
             webView.loadUrl(url)
         }
