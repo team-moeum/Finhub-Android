@@ -49,4 +49,5 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-messaging:21.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.61")
 }
