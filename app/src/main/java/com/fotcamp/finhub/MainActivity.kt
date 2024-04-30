@@ -17,15 +17,19 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val TAG = "MainActivity"
         const val PERMISSION_REQUEST_CODE = 5000
+        const val BASE_URL = "http://finhub-front-end.vercel.app/"
     }
 
+    private lateinit var webView: WebView
+
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val webView: WebView = findViewById(R.id.webview)
+        webView = findViewById(R.id.webview)
         webView.settings.run {
-            val url = "https://finhub-front-end.vercel.app"
+            val url = BASE_URL
             val webSettings = webView.settings
             webSettings.javaScriptEnabled = true
             webSettings.loadWithOverviewMode = true
@@ -43,6 +47,17 @@ class MainActivity : AppCompatActivity() {
         this.packageManager.getPackageInfo(this.packageName, 0)
 
         checkPermission()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (intent.getBooleanExtra("push", false)) {
+            val view = intent.getStringExtra("view")
+            webView.loadUrl(BASE_URL + view)
+
+            intent.putExtra("push", false)
+        }
     }
 
     // 뒤로가기 기능 구현

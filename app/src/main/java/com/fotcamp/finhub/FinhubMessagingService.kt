@@ -27,18 +27,20 @@ class FinhubMessagingService: FirebaseMessagingService() {
         val title = message.data["title"] ?: ""
         val body = message.data["body"] ?: ""
 
-        createNotification(title, body)
+        createNotification(title, body, message.data)
     }
 
-    private fun createNotification(title: String, body: String) {
+    private fun createNotification(title: String, body: String, data: Map<String, String>) {
         val intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        intent.putExtra("push", true)
+        intent.putExtra("view", data["view"] ?: "")
 
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
             intent,
-            PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
