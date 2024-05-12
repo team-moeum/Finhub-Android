@@ -3,6 +3,8 @@ package com.fotcamp.finhub
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import org.json.JSONObject
 
 interface WebBridgeInterface {
@@ -53,5 +55,22 @@ class WebBridgeHandler(private val context: Context, private val bridgeInterface
 
     fun setSafeAreaBackgroundColor(json: JSONObject) {
 
+    }
+
+    fun getPushToken(json: JSONObject) {
+        val callback = json.getString("callbackId")
+        if (callback.isEmpty()) {
+            return
+        }
+
+        val tokenTask = FirebaseMessaging.getInstance().token
+
+        if (tokenTask.isComplete) {
+            bridgeInterface?.callbackWeb(callback, tokenTask.result)
+        } else {
+            tokenTask.addOnCompleteListener {
+                bridgeInterface?.callbackWeb(callback, it.result)
+            }
+        }
     }
 }
