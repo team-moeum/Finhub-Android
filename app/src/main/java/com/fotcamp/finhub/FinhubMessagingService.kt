@@ -6,10 +6,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import java.util.Calendar
 
 class FinhubMessagingService: FirebaseMessagingService() {
     companion object {
@@ -54,6 +54,8 @@ class FinhubMessagingService: FirebaseMessagingService() {
         val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
         manager.createNotificationChannel(channel)
 
-        manager.notify(0, builder.build())
+        val id: Int = Calendar.getInstance().timeInMillis.toInt() % Int.MAX_VALUE;
+        manager.notify(id, builder.build())
     }
+
 }
