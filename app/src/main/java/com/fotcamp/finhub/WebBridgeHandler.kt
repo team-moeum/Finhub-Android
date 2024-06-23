@@ -3,7 +3,6 @@ package com.fotcamp.finhub
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import org.json.JSONObject
 
@@ -71,6 +70,18 @@ class WebBridgeHandler(private val context: Context, private val bridgeInterface
             tokenTask.addOnCompleteListener {
                 bridgeInterface?.callbackWeb(callback, it.result)
             }
+        }
+    }
+
+    fun getRemoteConfig(json: JSONObject) {
+        val key = json.getString("val2")
+        val callback = json.getString("callbackId")
+        if (key.isEmpty() || callback.isEmpty()) {
+            return
+        }
+
+        FinhubRemoteConfig.getInstance().get(key) {
+            bridgeInterface?.callbackWeb(callback, it)
         }
     }
 }
