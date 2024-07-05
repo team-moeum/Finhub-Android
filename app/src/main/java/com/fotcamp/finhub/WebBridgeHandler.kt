@@ -74,14 +74,13 @@ class WebBridgeHandler(private val context: Context, private val bridgeInterface
     }
 
     fun getRemoteConfig(json: JSONObject) {
-        val key = json.getString("val2")
         val callback = json.getString("callbackId")
-        if (key.isEmpty() || callback.isEmpty()) {
+        if (callback.isEmpty()) {
             return
         }
 
-        FinhubRemoteConfig.getInstance().get(key) {
-            bridgeInterface?.callbackWeb(callback, it)
+        FinhubRemoteConfig.getInstance().get() {
+            bridgeInterface?.callbackWeb(callback, it.toString())
         }
     }
 }
