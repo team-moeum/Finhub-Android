@@ -63,6 +63,8 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, token)
             Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
         })
+
+        FinhubRemoteConfig.getInstance().ready()
     }
 
     override fun onResume() {
