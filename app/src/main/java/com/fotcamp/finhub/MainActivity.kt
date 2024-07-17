@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
             webSettings.loadWithOverviewMode = true
             webSettings.useWideViewPort = true
             webSettings.textZoom = 100;
+            webSettings.domStorageEnabled = true
 
             webView.webViewClient = WebViewClient()
             webView.webChromeClient = WebChromeClient()
