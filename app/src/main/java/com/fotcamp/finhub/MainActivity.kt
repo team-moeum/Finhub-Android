@@ -62,7 +62,6 @@ class MainActivity : AppCompatActivity() {
 
             // Log and toast
             Log.d(TAG, token)
-            Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
         })
 
         FinhubRemoteConfig.getInstance().ready()
