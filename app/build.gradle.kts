@@ -12,8 +12,8 @@ android {
         applicationId = "com.fotcamp.finhub"
         minSdk = 30
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.0.2"
+        versionCode = 6
+        versionName = "1.0.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,4 +48,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging:21.1.0")
+    implementation("com.google.firebase:firebase-config")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.61")
 }
