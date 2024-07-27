@@ -40,7 +40,13 @@ class MainActivity : AppCompatActivity() {
             webSettings.textZoom = 100;
             webSettings.domStorageEnabled = true
 
-            webView.webViewClient = WebViewClient()
+            webView.webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+
+                    onWebViewPageFinished()
+                }
+            }
             webView.webChromeClient = WebChromeClient()
             webView.overScrollMode = View.OVER_SCROLL_NEVER
 
@@ -51,18 +57,6 @@ class MainActivity : AppCompatActivity() {
         this.packageManager.getPackageInfo(this.packageName, 0)
 
         checkPermission()
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
-                return@OnCompleteListener
-            }
-
-            // Get new FCM registration token
-            val token = task.result
-
-            // Log and toast
-            Log.d(TAG, token)
-        })
 
         FinhubRemoteConfig.getInstance().ready()
     }
@@ -113,6 +107,33 @@ class MainActivity : AppCompatActivity() {
                 requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), PERMISSION_REQUEST_CODE)
             }
         }
+    }
+
+    private fun onWebViewPageFinished() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            Log.d(TAG, token)
+
+            val jsCode = "window.dispatchEvent(new CustomEvent('getPushToken', { detail: '${token}' }));"
+
+            webView.post {
+                webView.evaluateJavascript(jsCode) {
+                    if (it.equals("true")) {
+                        Log.d("finhub","Event dispatched successfully with data")
+                    } else {
+                        Log.d("finhub", "Error dispatching event in WebView")
+                    }
+                }
+            }
+        })
     }
 }
 
