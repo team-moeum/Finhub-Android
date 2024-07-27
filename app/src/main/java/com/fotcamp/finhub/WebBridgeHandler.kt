@@ -19,11 +19,12 @@ class WebBridgeHandler(private val context: Context, private val bridgeInterface
     fun share(json: JSONObject) {
         val urlString = json.getString("val2")
 
-        val intent = Intent()
-        intent.setAction(Intent.ACTION_SEND)
-        intent.putExtra(Intent.EXTRA_TITLE, urlString)
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, urlString)
+        }
 
-        context.startActivity(Intent.createChooser(intent, null))
+        context.startActivity(Intent.createChooser(intent, urlString))
     }
 
     fun appVersion(json: JSONObject) {
