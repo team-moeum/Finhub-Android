@@ -3,6 +3,11 @@ package com.fotcamp.finhub
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import org.json.JSONObject
 
@@ -81,6 +86,33 @@ class WebBridgeHandler(private val context: Context, private val bridgeInterface
 
         FinhubRemoteConfig.getInstance().get() {
             bridgeInterface?.callbackWeb(callback, it.toString())
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    fun getNotificationPermission(json: JSONObject) {
+        val callback = json.getString("callbackId")
+        if (callback.isEmpty()) {
+            return
+        }
+
+        val granted = ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS)
+        val result = JSONObject().apply {
+            put("result", granted == PackageManager.PERMISSION_GRANTED)
+        }
+
+        bridgeInterface?.callbackWeb(callback, result.toString())
+    }
+
+    fun requestNotificationPermission(json: JSONObject) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permission = arrayOf(android.Manifest.permission.POST_NOTIFICATIONS)
+            (context as MainActivity).requestPermissions(permission, MainActivity.PERMISSION_REQUEST_CODE)
+        } else {
+            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+            }
+            context.startActivity(intent)
         }
     }
 }
