@@ -40,6 +40,11 @@ class MainActivity : AppCompatActivity() {
             webSettings.textZoom = 100;
             webSettings.domStorageEnabled = true
 
+            val originalUserAgent = webSettings.userAgentString
+            val modifiedUserAgent =
+                originalUserAgent.replace(" wv", "").replace("Version/\\d+\\.\\d+".toRegex(), "")
+            webSettings.userAgentString = modifiedUserAgent
+
             webView.webViewClient = WebViewClient()
             webView.webChromeClient = WebChromeClient()
             webView.overScrollMode = View.OVER_SCROLL_NEVER
