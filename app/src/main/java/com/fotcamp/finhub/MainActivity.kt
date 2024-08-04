@@ -1,6 +1,7 @@
 package com.fotcamp.finhub
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -72,14 +73,39 @@ class MainActivity : AppCompatActivity() {
         FinhubRemoteConfig.getInstance().ready()
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        runPushAction(intent)
+    }
+
     override fun onResume() {
         super.onResume()
 
-        if (intent.getBooleanExtra("push", false)) {
-            val view = intent.getStringExtra("view")
-            webView.loadUrl(BASE_URL + view)
+        runPushAction(intent)
+        intent.putExtra("push", false)
+    }
 
-            intent.putExtra("push", false)
+    private fun runPushAction(intent: Intent?) {
+        if (intent == null) {
+            return
+        }
+
+        val view = intent.getStringExtra("view")
+        if (view != null) {
+            webView.loadUrl(BASE_URL + view)
+        }
+
+        val action = intent.getStringExtra("action")
+        if (action != null) {
+            webView.post {
+                val jsCode = "window.dispatchEvent(new CustomEvent('pushAction', { detail: '$action' }));"
+                webView.evaluateJavascript(jsCode) {
+                    if (!it.equals("true")) {
+                        Log.e("finhub", "Error dispatching event in WebView")
+                    }
+                }
+            }
         }
     }
 
