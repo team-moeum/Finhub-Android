@@ -92,12 +92,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         val view = intent.getStringExtra("view")
-        if (view != null) {
+        if (!view.isNullOrEmpty()) {
             webView.loadUrl(BASE_URL + view)
         }
 
         val action = intent.getStringExtra("action")
-        if (action != null) {
+        if (!action.isNullOrEmpty()) {
             webView.post {
                 val jsCode = "window.dispatchEvent(new CustomEvent('pushAction', { detail: '$action' }));"
                 webView.evaluateJavascript(jsCode) {
