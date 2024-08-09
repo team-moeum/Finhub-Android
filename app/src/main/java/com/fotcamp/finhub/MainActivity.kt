@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val TAG = "MainActivity"
         const val PERMISSION_REQUEST_CODE = 5000
-        const val BASE_URL = "https://main.fin-hub.co.kr/"
+        const val BASE_URL = BuildConfig.BASE_URL
     }
 
     private lateinit var webView: WebView
