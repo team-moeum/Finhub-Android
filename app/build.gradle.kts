@@ -25,6 +25,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            manifestPlaceholders["appName"] = "@string/app_name"
+        }
+        debug {
+            manifestPlaceholders["appName"] = "@string/app_name_dev"
+            applicationIdSuffix = ".debug"
         }
     }
     compileOptions {
