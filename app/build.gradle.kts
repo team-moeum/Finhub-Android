@@ -29,6 +29,7 @@ android {
         }
         debug {
             manifestPlaceholders["appName"] = "@string/app_name_dev"
+            applicationIdSuffix = ".debug"
         }
     }
     compileOptions {
