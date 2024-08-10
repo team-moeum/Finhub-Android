@@ -35,6 +35,8 @@ class FinhubMessagingService: FirebaseMessagingService() {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         intent.putExtra("push", true)
         intent.putExtra("view", data["view"] ?: "")
+        intent.putExtra("action", data["action"] ?: "")
+
 
         val pendingIntent = PendingIntent.getActivity(
             this,
