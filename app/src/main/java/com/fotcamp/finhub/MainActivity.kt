@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         }else{
             if (System.currentTimeMillis() - backPressTime >= 2000) {
                 backPressTime = System.currentTimeMillis()
-                Toast.makeText(this, "뒤로가기를 다시 누르면 종료합니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "한번 더 누르면 앱을 종료할 수 있어요", Toast.LENGTH_SHORT).show()
             } else {
                 super.onBackPressed()
             }
