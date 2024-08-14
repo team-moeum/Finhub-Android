@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
 
+    var backPressTime = 0L
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -116,7 +118,12 @@ class MainActivity : AppCompatActivity() {
         if(myWebView.canGoBack()){
             myWebView.goBack()
         }else{
-            super.onBackPressed()
+            if (System.currentTimeMillis() - backPressTime >= 2000) {
+                backPressTime = System.currentTimeMillis()
+                Toast.makeText(this, "한번 더 누르면 앱을 종료할 수 있어요", Toast.LENGTH_SHORT).show()
+            } else {
+                super.onBackPressed()
+            }
         }
     }
 
