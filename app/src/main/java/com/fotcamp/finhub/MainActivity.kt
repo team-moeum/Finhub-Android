@@ -1,6 +1,7 @@
 package com.fotcamp.finhub
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -20,10 +21,12 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val TAG = "MainActivity"
         const val PERMISSION_REQUEST_CODE = 5000
-        const val BASE_URL = "http://finhub-front-end.vercel.app/"
+        const val BASE_URL = BuildConfig.BASE_URL
     }
 
     private lateinit var webView: WebView
+
+    var backPressTime = 0L
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +42,11 @@ class MainActivity : AppCompatActivity() {
             webSettings.useWideViewPort = true
             webSettings.textZoom = 100;
             webSettings.domStorageEnabled = true
+
+            val originalUserAgent = webSettings.userAgentString
+            val modifiedUserAgent =
+                originalUserAgent.replace(" wv", "").replace("Version/\\d+\\.\\d+".toRegex(), "")
+            webSettings.userAgentString = modifiedUserAgent
 
             webView.webViewClient = WebViewClient()
             webView.webChromeClient = WebChromeClient()
@@ -62,20 +70,44 @@ class MainActivity : AppCompatActivity() {
 
             // Log and toast
             Log.d(TAG, token)
-            Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
         })
 
         FinhubRemoteConfig.getInstance().ready()
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        runPushAction(intent)
+    }
+
     override fun onResume() {
         super.onResume()
 
-        if (intent.getBooleanExtra("push", false)) {
-            val view = intent.getStringExtra("view")
-            webView.loadUrl(BASE_URL + view)
+        runPushAction(intent)
+        intent.putExtra("push", false)
+    }
 
-            intent.putExtra("push", false)
+    private fun runPushAction(intent: Intent?) {
+        if (intent == null) {
+            return
+        }
+
+        val view = intent.getStringExtra("view")
+        if (!view.isNullOrEmpty()) {
+            webView.loadUrl(BASE_URL + view)
+        }
+
+        val action = intent.getStringExtra("action")
+        if (!action.isNullOrEmpty()) {
+            webView.post {
+                val jsCode = "window.dispatchEvent(new CustomEvent('pushAction', { detail: '$action' }));"
+                webView.evaluateJavascript(jsCode) {
+                    if (!it.equals("true")) {
+                        Log.e("finhub", "Error dispatching event in WebView")
+                    }
+                }
+            }
         }
     }
 
@@ -86,7 +118,12 @@ class MainActivity : AppCompatActivity() {
         if(myWebView.canGoBack()){
             myWebView.goBack()
         }else{
-            super.onBackPressed()
+            if (System.currentTimeMillis() - backPressTime >= 2000) {
+                backPressTime = System.currentTimeMillis()
+                Toast.makeText(this, "한번 더 누르면 앱을 종료할 수 있어요", Toast.LENGTH_SHORT).show()
+            } else {
+                super.onBackPressed()
+            }
         }
     }
 

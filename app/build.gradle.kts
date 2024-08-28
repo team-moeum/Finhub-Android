@@ -12,8 +12,8 @@ android {
         applicationId = "com.fotcamp.finhub"
         minSdk = 30
         targetSdk = 34
-        versionCode = 6
-        versionName = "1.0.6"
+        versionCode = 13
+        versionName = "1.0.13"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -25,6 +25,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            manifestPlaceholders["appName"] = "@string/app_name"
+            buildConfigField("String", "BASE_URL", "\"https://main.fin-hub.co.kr/\"")
+        }
+        debug {
+            manifestPlaceholders["appName"] = "@string/app_name_dev"
+            applicationIdSuffix = ".debug"
+            buildConfigField("String", "BASE_URL", "\"https://dev-main.fin-hub.co.kr/\"")
         }
     }
     compileOptions {
@@ -33,6 +40,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
