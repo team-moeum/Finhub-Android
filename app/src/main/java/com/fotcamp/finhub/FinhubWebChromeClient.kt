@@ -18,6 +18,7 @@ class FinhubWebChromeClient(
     ): Boolean {
         this.filePathCallback = filePathCallback
         val filePickerIntent = fileChooserParams?.createIntent()
+        filePickerIntent?.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         if (filePickerIntent == null) {
             cancelFileChooser()
         } else {

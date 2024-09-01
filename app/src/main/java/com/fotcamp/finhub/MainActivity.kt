@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -160,16 +161,26 @@ class MainActivity : AppCompatActivity() {
 
     private fun setWebChromeClient() {
         fileChooseResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data = result.data?.data
-                if (data != null) {
-                    webChromeClient.selectFiles(arrayOf(data))
+            val list = mutableListOf<Uri>()
 
-                    return@registerForActivityResult
+            if (result.resultCode == RESULT_OK && result.data != null) {
+
+                if (result.data!!.clipData != null) {
+                    val clipData = result.data!!.clipData!!
+                    val selectedCount = clipData.itemCount
+                    for (i in 0 until selectedCount) {
+                        list.add(clipData.getItemAt(i).uri)
+                    }
+                } else if (result.data!!.data != null) {
+                    list.add(result.data!!.data!!)
                 }
             }
 
-            webChromeClient.cancelFileChooser()
+            if (list.isEmpty()) {
+                webChromeClient.cancelFileChooser()
+            } else {
+                webChromeClient.selectFiles(list.toTypedArray())
+            }
         }
 
         webChromeClient = FinhubWebChromeClient(
