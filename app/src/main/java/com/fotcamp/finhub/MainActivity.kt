@@ -1,18 +1,21 @@
 package com.fotcamp.finhub
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.webkit.JavascriptInterface
-import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import org.json.JSONObject
@@ -25,8 +28,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var webView: WebView
+    private lateinit var webChromeClient: FinhubWebChromeClient
+    private lateinit var fileChooseResult: ActivityResultLauncher<Intent>
 
-    var backPressTime = 0L
+    private var backPressTime = 0L
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +54,8 @@ class MainActivity : AppCompatActivity() {
             webSettings.userAgentString = modifiedUserAgent
 
             webView.webViewClient = WebViewClient()
-            webView.webChromeClient = WebChromeClient()
+            setWebChromeClient()
+
             webView.overScrollMode = View.OVER_SCROLL_NEVER
 
             webView.addJavascriptInterface(WebViewContentController(webView), "Bridge")
@@ -151,6 +157,43 @@ class MainActivity : AppCompatActivity() {
                 requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), PERMISSION_REQUEST_CODE)
             }
         }
+    }
+
+    private fun setWebChromeClient() {
+        fileChooseResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val list = mutableListOf<Uri>()
+
+            if (result.resultCode == RESULT_OK && result.data != null) {
+
+                if (result.data!!.clipData != null) {
+                    val clipData = result.data!!.clipData!!
+                    val selectedCount = clipData.itemCount
+                    for (i in 0 until selectedCount) {
+                        list.add(clipData.getItemAt(i).uri)
+                    }
+                } else if (result.data!!.data != null) {
+                    list.add(result.data!!.data!!)
+                }
+            }
+
+            if (list.isEmpty()) {
+                webChromeClient.cancelFileChooser()
+            } else {
+                webChromeClient.selectFiles(list.toTypedArray())
+            }
+        }
+
+        webChromeClient = FinhubWebChromeClient(
+            onShowFilePicker = { fileChooserIntent ->
+                try {
+                    fileChooseResult.launch(fileChooserIntent)
+                } catch (e: ActivityNotFoundException) {
+                    webChromeClient.cancelFileChooser()
+                }
+            }
+        )
+
+        webView.webChromeClient = webChromeClient
     }
 }
 
