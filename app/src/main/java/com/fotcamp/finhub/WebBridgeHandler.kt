@@ -9,7 +9,10 @@ import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.messaging.FirebaseMessaging
+import com.kakao.sdk.user.UserApiClient
 import org.json.JSONObject
 
 interface WebBridgeInterface {
@@ -121,5 +124,60 @@ class WebBridgeHandler(private val context: Context, private val bridgeInterface
             putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
         }
         context.startActivity(intent)
+    }
+
+    fun loginKakao(json: JSONObject) {
+        val callback = json.getString("callbackId")
+        if (callback.isEmpty()) {
+            return
+        }
+
+        UserApiClient.instance.loginWithKakaoTalk(context) { token, error ->
+            val result = JSONObject()
+
+            if (token != null) {
+                result.put("result", "success")
+                result.put("token", token.accessToken)
+            } else if (error != null) {
+                if ("KakaoTalk not installed".equals(error.message)) {
+                    result.put("result", "notInstalled")
+                } else {
+                    result.put("result", "error")
+                }
+                result.put("msg", error.message)
+            } else {
+                result.put("result", "failed")
+                result.put("msg", "로그인 실패")
+            }
+
+            bridgeInterface?.callbackWeb(callback, result.toString())
+        }
+    }
+
+    fun loginGoogle(json: JSONObject) {
+        val callback = json.getString("callbackId")
+        if (callback.isEmpty()) {
+            return
+        }
+
+        val result = JSONObject()
+        GoogleLogin.getInstance().login { data ->
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                bridgeInterface?.callbackWeb(callback, account.idToken ?: "")
+
+                if (account.idToken != null) {
+                    result.put("result", "success")
+                    result.put("token", account.idToken)
+                } else {
+                    result.put("result", "error")
+                }
+            } catch (e: ApiException) {
+                result.put("result", "error")
+            }
+
+            bridgeInterface?.callbackWeb(callback, result.toString())
+        }
     }
 }

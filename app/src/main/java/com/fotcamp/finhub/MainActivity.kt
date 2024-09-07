@@ -14,6 +14,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.gms.tasks.OnCompleteListener
@@ -32,6 +33,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fileChooseResult: ActivityResultLauncher<Intent>
 
     private var backPressTime = 0L
+
+    private lateinit var loginLauncher: ActivityResultLauncher<Intent>
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,6 +82,16 @@ class MainActivity : AppCompatActivity() {
         })
 
         FinhubRemoteConfig.getInstance().ready()
+
+        initLogin()
+    }
+
+    private fun initLogin() {
+        loginLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {result: ActivityResult ->
+            GoogleLogin.getInstance().receiveResult(result)
+        }
+
+        GoogleLogin.getInstance().init(this, loginLauncher)
     }
 
     override fun onNewIntent(intent: Intent?) {
