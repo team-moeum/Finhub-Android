@@ -6,13 +6,15 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.auth.api.signin.GoogleSignIn
+//import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.messaging.FirebaseMessaging
 import com.kakao.sdk.user.UserApiClient
+import kotlinx.coroutines.Dispatchers
 import org.json.JSONObject
 
 interface WebBridgeInterface {
@@ -161,23 +163,15 @@ class WebBridgeHandler(private val context: Context, private val bridgeInterface
         }
 
         val result = JSONObject()
+
         GoogleLogin.getInstance().login { data ->
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                bridgeInterface?.callbackWeb(callback, account.idToken ?: "")
-
-                if (account.idToken != null) {
-                    result.put("result", "success")
-                    result.put("token", account.idToken)
-                } else {
-                    result.put("result", "error")
-                }
-            } catch (e: ApiException) {
-                result.put("result", "error")
+            if (data != null) {
+                result.put("result", "success")
+                result.put("token", data)
+            } else {
+                result.put("result", "failed")
+                result.put("msg", "로그인 실패")
             }
-
-            bridgeInterface?.callbackWeb(callback, result.toString())
         }
     }
 }
