@@ -172,6 +172,8 @@ class WebBridgeHandler(private val context: Context, private val bridgeInterface
                 result.put("result", "failed")
                 result.put("msg", "로그인 실패")
             }
+
+            bridgeInterface?.callbackWeb(callback, result.toString())
         }
     }
 }
