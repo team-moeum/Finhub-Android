@@ -6,10 +6,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+//import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.messaging.FirebaseMessaging
+import com.kakao.sdk.auth.model.OAuthToken
+import com.kakao.sdk.user.UserApiClient
+import kotlinx.coroutines.Dispatchers
 import org.json.JSONObject
 
 interface WebBridgeInterface {
@@ -121,5 +127,60 @@ class WebBridgeHandler(private val context: Context, private val bridgeInterface
             putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
         }
         context.startActivity(intent)
+    }
+
+    fun loginKakao(json: JSONObject) {
+        val callback = json.getString("callbackId")
+        if (callback.isEmpty()) {
+            return
+        }
+
+        if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
+            UserApiClient.instance.loginWithKakaoTalk(context) { token, error ->
+                completeKakaoLogin(callback, token, error)
+            }
+        } else {
+            UserApiClient.instance.loginWithKakaoAccount(context) { token, error ->
+                completeKakaoLogin(callback, token, error)
+            }
+        }
+    }
+
+    private fun completeKakaoLogin(callback: String, token: OAuthToken?, error: Throwable?) {
+        val result = JSONObject()
+
+        if (token != null) {
+            result.put("result", "success")
+            result.put("token", token.accessToken)
+        } else if (error != null) {
+            result.put("result", "error")
+            result.put("msg", error.message)
+        } else {
+            result.put("result", "failed")
+            result.put("msg", "로그인 실패")
+        }
+
+        bridgeInterface?.callbackWeb(callback, result.toString())
+    }
+
+    fun loginGoogle(json: JSONObject) {
+        val callback = json.getString("callbackId")
+        if (callback.isEmpty()) {
+            return
+        }
+
+        val result = JSONObject()
+
+        GoogleLogin.getInstance().login { data ->
+            if (data != null) {
+                result.put("result", "success")
+                result.put("token", data)
+            } else {
+                result.put("result", "failed")
+                result.put("msg", "로그인 실패")
+            }
+
+            bridgeInterface?.callbackWeb(callback, result.toString())
+        }
     }
 }
