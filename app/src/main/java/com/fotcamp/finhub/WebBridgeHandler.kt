@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 //import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.messaging.FirebaseMessaging
+import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import kotlinx.coroutines.Dispatchers
 import org.json.JSONObject
@@ -134,26 +135,32 @@ class WebBridgeHandler(private val context: Context, private val bridgeInterface
             return
         }
 
-        UserApiClient.instance.loginWithKakaoTalk(context) { token, error ->
-            val result = JSONObject()
-
-            if (token != null) {
-                result.put("result", "success")
-                result.put("token", token.accessToken)
-            } else if (error != null) {
-                if ("KakaoTalk not installed".equals(error.message)) {
-                    result.put("result", "notInstalled")
-                } else {
-                    result.put("result", "error")
-                }
-                result.put("msg", error.message)
-            } else {
-                result.put("result", "failed")
-                result.put("msg", "로그인 실패")
+        if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
+            UserApiClient.instance.loginWithKakaoTalk(context) { token, error ->
+                completeKakaoLogin(callback, token, error)
             }
-
-            bridgeInterface?.callbackWeb(callback, result.toString())
+        } else {
+            UserApiClient.instance.loginWithKakaoAccount(context) { token, error ->
+                completeKakaoLogin(callback, token, error)
+            }
         }
+    }
+
+    private fun completeKakaoLogin(callback: String, token: OAuthToken?, error: Throwable?) {
+        val result = JSONObject()
+
+        if (token != null) {
+            result.put("result", "success")
+            result.put("token", token.accessToken)
+        } else if (error != null) {
+            result.put("result", "error")
+            result.put("msg", error.message)
+        } else {
+            result.put("result", "failed")
+            result.put("msg", "로그인 실패")
+        }
+
+        bridgeInterface?.callbackWeb(callback, result.toString())
     }
 
     fun loginGoogle(json: JSONObject) {
